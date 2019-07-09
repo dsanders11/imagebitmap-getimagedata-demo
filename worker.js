@@ -13,11 +13,10 @@ onmessage = async (event) => {
     postMessage(getAverageColor(new ImageData(data, width, height)));
   } else if (event.data.type === 'ImageBitmap') {
     const imageBitmap = event.data.imageBitmap;
+    const { width, height } = imageBitmap;
     const { method, options } = event.data.options;
 
     if (method === 'OffscreenCanvas') {
-      const { width, height } = imageBitmap;
-
       if (offscreenCanvas === null) {
         offscreenCanvas = new OffscreenCanvas(width, height);
         offscreenCtx = offscreenCanvas.getContext('2d');
