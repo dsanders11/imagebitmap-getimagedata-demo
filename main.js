@@ -20,12 +20,12 @@ const ctx = canvasEl.getContext('2d');
 let capturer = null;
 
 document.getElementById('startVideo').onclick = async (event) => {
-  document.getElementById('getImageDataMethods').disabled = false;
+  document.getElementById('captureResolutions').disabled = true;
   event.target.disabled = true;
 
   let width, height;
 
-  const captureResolution = document.querySelector('[name="captureResolution"]').value;
+  const captureResolution = document.querySelector('[name="captureResolution"]:checked').value;
 
   switch (captureResolution) {
     case '1080p':
@@ -47,10 +47,15 @@ document.getElementById('startVideo').onclick = async (event) => {
   canvasEl.width = width;
   canvasEl.height = height;
 
-  // TODO - Handle failure
-  const mediaStream = await navigator.mediaDevices.getUserMedia({
-    video: { width: { exact: width }, height: { exact: height } }
-  })
+  try {
+    const mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { exact: width }, height: { exact: height } }
+    })
+  } catch (err) {
+    console.error(err);
+    alert(err);
+    return;
+  }
 
   if (hasImageCapture) {
     capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
@@ -83,7 +88,7 @@ const capturers = {
 document.getElementById('CanvasRenderingContext2D').onclick = () => {
   disableUI();
 
-  const captureMethod = document.querySelector('[name="captureMethod"]').value;
+  const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
   const capturer = capturers[captureMethod];
 
   runForever(capturer, 'CanvasRenderingContext2D');
@@ -92,7 +97,7 @@ document.getElementById('CanvasRenderingContext2D').onclick = () => {
 document.getElementById('OffscreenCanvas').onclick = () => {
   disableUI();
 
-  const captureMethod = document.querySelector('[name="captureMethod"]').value;
+  const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
   const capturer = capturers[captureMethod];
 
   runForever(capturer, 'OffscreenCanvas');
@@ -101,7 +106,7 @@ document.getElementById('OffscreenCanvas').onclick = () => {
 document.getElementById('ImageBitmap-getImageData').onclick = () => {
   disableUI();
 
-  const captureMethod = document.querySelector('[name="captureMethod"]').value;
+  const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
   const capturer = capturers[captureMethod];
 
   runForever(capturer, 'ImageBitmap-getImageData');
