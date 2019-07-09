@@ -31,7 +31,7 @@ onmessage = async (event) => {
         neuter: options.neuter,
       });
 
-      if (options.neuter) {
+      if (!options.neuter) {
         imageBitmap.close();
       }
 
