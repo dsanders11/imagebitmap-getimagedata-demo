@@ -92,7 +92,7 @@ document.getElementById('CanvasRenderingContext2D').onclick = () => {
 document.getElementById('OffscreenCanvas').onclick = () => {
   disableUI();
 
-  const captureMethod = document.querySelector('[name="captureMethod"]')..value;
+  const captureMethod = document.querySelector('[name="captureMethod"]').value;
   const capturer = capturers[captureMethod];
 
   runForever(capturer, 'OffscreenCanvas');
@@ -101,7 +101,7 @@ document.getElementById('OffscreenCanvas').onclick = () => {
 document.getElementById('ImageBitmap-getImageData').onclick = () => {
   disableUI();
 
-  const captureMethod = document.querySelector('[name="captureMethod"]')..value;
+  const captureMethod = document.querySelector('[name="captureMethod"]').value;
   const capturer = capturers[captureMethod];
 
   runForever(capturer, 'ImageBitmap-getImageData');
