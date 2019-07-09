@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      #avgColor {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border: 1px solid black;
+      }
+
+      fieldset[disabled] {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <fieldset id="captureResolutions">
+      <p>Capture Resolution</p>
+      <input type="radio" name="captureResolution" value="1080p" checked> 1080p<br>
+      <input type="radio" name="captureResolution" value="720p"> 720p<br>
+      <input type="radio" name="captureResolution" value="480p"> 480p<br>
+    </fieldset>
+    <br>
+    <fieldset id="captureMethods">
+      <p>ImageBitmap Capture Method</p>
+      <input type="radio" name="captureMethod" value="HTMLVideoElement" checked> HTMLVideoElement<br>
+      <input type="radio" name="captureMethod" value="ImageCapture.takePhoto"> ImageCapture.takePhoto<br>
+      <input type="radio" name="captureMethod" value="ImageCapture.grabFrame"> ImageCapture.grabFrame<br>
+    </fieldset>
+    <br>
+    <fieldset id="getImageDataOptions">
+      <p>ImageBitmap.getImageData Options</p>
+      <input type="checkbox" name="reuseImageData" checked> imageData<br>
+      <input type="checkbox" name="neuter" checked> neuter<br>
+    </fieldset>
+    <br>
+    <fieldset id="getImageDataMethods">
+      <p>getImageData Method</p>
+      <button type="button" id="CanvasRenderingContext2D">CanvasRenderingContext2D</button>
+      <button type="button" id="OffscreenCanvas">OffscreenCanvas</button>
+      <button type="button" id="ImageBitmap-getImageData">ImageBitmap.getImageData</button>
+    </fieldset>
+    <br>
+    <button type="button" id="startVideo">Start Video</button>
+    <br>
+    <br>
+    <div id="avgColor"></div>
+    <p id="fps"></p>
+    <script src="./main.js"></script>
+  </body>
+</html>
