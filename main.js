@@ -19,15 +19,13 @@ const ctx = canvasEl.getContext('2d');
 
 let capturer = null;
 
-// let captureImageBitmap = () => { throw new Error('Placeholder') }
-
 document.getElementById('startVideo').onclick = async (event) => {
   document.getElementById('getImageDataMethods').disabled = false;
   event.target.disabled = true;
 
   let width, height;
 
-  const captureResolution = document.getElementById('captureResolution').value;
+  const captureResolution = document.querySelector('[name="captureResolution"]').value;
 
   switch (captureResolution) {
     case '1080p':
@@ -85,7 +83,7 @@ const capturers = {
 document.getElementById('CanvasRenderingContext2D').onclick = () => {
   disableUI();
 
-  const captureMethod = document.getElementById('captureMethod').value;
+  const captureMethod = document.querySelector('[name="captureMethod"]').value;
   const capturer = capturers[captureMethod];
 
   runForever(capturer, 'CanvasRenderingContext2D');
@@ -94,7 +92,7 @@ document.getElementById('CanvasRenderingContext2D').onclick = () => {
 document.getElementById('OffscreenCanvas').onclick = () => {
   disableUI();
 
-  const captureMethod = document.getElementById('captureMethod').value;
+  const captureMethod = document.querySelector('[name="captureMethod"]')..value;
   const capturer = capturers[captureMethod];
 
   runForever(capturer, 'OffscreenCanvas');
@@ -103,7 +101,7 @@ document.getElementById('OffscreenCanvas').onclick = () => {
 document.getElementById('ImageBitmap-getImageData').onclick = () => {
   disableUI();
 
-  const captureMethod = document.getElementById('captureMethod').value;
+  const captureMethod = document.querySelector('[name="captureMethod"]')..value;
   const capturer = capturers[captureMethod];
 
   runForever(capturer, 'ImageBitmap-getImageData');
