@@ -1,12 +1,12 @@
 // Feature detect
-const hasImageCapture = Boolean(ImageCapture);
+const hasImageCapture = Boolean(window.ImageCapture);
 
 document.querySelector('input[name="captureMethod"][value="ImageCapture.takePhoto"]').disabled = !Boolean(hasImageCapture && ImageCapture.prototype.takePhoto);
 document.querySelector('input[name="captureMethod"][value="ImageCapture.grabFrame"]').disabled = !Boolean(hasImageCapture && ImageCapture.prototype.grabFrame);
 
 document.getElementById('OffscreenCanvas').disabled = !Boolean(OffscreenCanvas);
 
-const hasPatch = Boolean(ImageBitmap && ImageBitmap.prototype.getImageData);
+const hasPatch = Boolean(window.ImageBitmap && ImageBitmap.prototype.getImageData);
 
 document.getElementById('ImageBitmap-getImageData').disabled = !hasPatch;
 document.getElementById('getImageDataOptions').disabled = !hasPatch;
