@@ -4,7 +4,7 @@ Demos for performance of capturing and processing webcam frames using several me
 
 # ImageBitmap Patches
 
-There's a patch for both Chromium and Firefox.
+There's a patch for both Chromium and Firefox. They can be found under the patches directory.
 
 # Results
 

@@ -1,0 +1,173 @@
+diff --git a/dom/canvas/ImageBitmap.cpp b/dom/canvas/ImageBitmap.cpp
+index 9c178711f295..e4d1f010c61c 100644
+--- a/dom/canvas/ImageBitmap.cpp
++++ b/dom/canvas/ImageBitmap.cpp
+@@ -461,6 +461,118 @@ JSObject* ImageBitmap::WrapObject(JSContext* aCx,
+   return ImageBitmap_Binding::Wrap(aCx, this, aGivenProto);
+ }
+ 
++already_AddRefed<ImageData> ImageBitmap::GetImageData(double aSx,
++                                                      double aSy, double aSw, double aSh,
++                                                      const GetImageDataOptions& options,
++                                                      mozilla::ErrorResult& aError) {
++  int32_t x = JS::ToInt32(aSx);
++  int32_t y = JS::ToInt32(aSy);
++  int32_t wi = JS::ToInt32(aSw);
++  int32_t hi = JS::ToInt32(aSh);
++
++  // Handle negative width and height by flipping the rectangle over in the
++  // relevant direction.
++  uint32_t w, h;
++  if (aSw < 0) {
++    w = -wi;
++    x -= w;
++  } else {
++    w = wi;
++  }
++  if (aSh < 0) {
++    h = -hi;
++    y -= h;
++  } else {
++    h = hi;
++  }
++
++  if (w == 0) {
++    w = 1;
++  }
++  if (h == 0) {
++    h = 1;
++  }
++
++  CheckedInt<uint32_t> len = CheckedInt<uint32_t>(w) * h * 4;
++  if (!len.isValid()) {
++    aError.Throw(NS_ERROR_DOM_INDEX_SIZE_ERR);
++    return nullptr;
++  }
++
++  IntRect srcRect(0, 0, Width(), Height());
++  IntRect destRect(x, y, w, h);
++  IntRect srcReadRect = srcRect.Intersect(destRect);
++  if (srcReadRect.IsEmpty()) {
++    // TODO
++  }
++
++  IntRect dstWriteRect = srcReadRect;
++  dstWriteRect.MoveBy(-x, -y);
++
++  RefPtr<DrawTarget> target = gfx::Factory::CreateDrawTarget(gfx::BackendType::SKIA,
++                                                             dstWriteRect.Size(),
++                                                             SurfaceFormat::R8G8B8A8);
++  RefPtr<SourceSurface> snapshot = PrepareForDrawTarget(target);
++
++  RefPtr<DataSourceSurface> readback = snapshot->GetDataSurface();
++
++  DataSourceSurface::MappedSurface rawData;
++  if (!readback || !readback->Map(DataSourceSurface::READ, &rawData)) {
++    aError.Throw(NS_ERROR_OUT_OF_MEMORY);
++    return nullptr;
++  }
++
++  RefPtr<ImageData> imageData = options.mImageData;
++
++  if (!imageData) {
++    JSContext* context = nsContentUtils::GetCurrentJSContext();
++    JS::Rooted<JSObject*> darray(context, JS_NewUint8ClampedArray(context, len.value()));
++
++    do {
++      JS::AutoCheckCannotGC nogc;
++      bool isShared;
++      uint8_t* data = JS_GetUint8ClampedArrayData(darray, &isShared, nogc);
++      MOZ_ASSERT(!isShared);  // Should not happen, data was created above
++
++      uint32_t srcStride = rawData.mStride;
++      uint8_t* src =
++          rawData.mData + srcReadRect.y * srcStride + srcReadRect.x * 4;
++
++      uint8_t* dst = data + dstWriteRect.y * (w * 4) + dstWriteRect.x * 4;
++
++      SwizzleData(src, srcStride, SurfaceFormat::X8R8G8B8_UINT32, dst,
++                  w * 4, SurfaceFormat::R8G8B8A8, dstWriteRect.Size());
++    } while (false);
++
++    imageData = new ImageData(w, h, *darray);
++  } else {
++    JSObject* darray = imageData->GetDataObject();
++
++    do {
++      JS::AutoCheckCannotGC nogc;
++      bool isShared;
++      uint8_t* data = JS_GetUint8ClampedArrayData(darray, &isShared, nogc);
++
++      uint32_t srcStride = rawData.mStride;
++      uint8_t* src =
++          rawData.mData + srcReadRect.y * srcStride + srcReadRect.x * 4;
++
++      uint8_t* dst = data + dstWriteRect.y * (w * 4) + dstWriteRect.x * 4;
++
++      SwizzleData(src, srcStride, SurfaceFormat::X8R8G8B8_UINT32, dst,
++                  w * 4, SurfaceFormat::R8G8B8A8, dstWriteRect.Size());
++    } while (false);
++  }
++
++  readback->Unmap();
++
++  if (options.mNeuter) {
++    Close();
++  }
++
++  return imageData.forget();
++}
++
+ void ImageBitmap::Close() {
+   mData = nullptr;
+   mSurface = nullptr;
+diff --git a/dom/canvas/ImageBitmap.h b/dom/canvas/ImageBitmap.h
+index f11fc8ccc0c5..377f21177080 100644
+--- a/dom/canvas/ImageBitmap.h
++++ b/dom/canvas/ImageBitmap.h
+@@ -8,6 +8,7 @@
+ #define mozilla_dom_ImageBitmap_h
+ 
+ #include "mozilla/Attributes.h"
++#include "mozilla/dom/ImageBitmapBinding.h"
+ #include "mozilla/dom/ImageBitmapSource.h"
+ #include "mozilla/dom/TypedArray.h"
+ #include "mozilla/gfx/Rect.h"
+@@ -88,6 +89,11 @@ class ImageBitmap final : public nsISupports, public nsWrapperCache {
+ 
+   uint32_t Height() const { return mPictureRect.Height(); }
+ 
++  already_AddRefed<ImageData> GetImageData(double aSx, double aSy,
++                                           double aSw, double aSh,
++                                           const GetImageDataOptions& options,
++                                           mozilla::ErrorResult& aError);
++
+   void Close();
+ 
+   /*
+diff --git a/dom/webidl/ImageBitmap.webidl b/dom/webidl/ImageBitmap.webidl
+index 8c27ed1a2591..87f91b8b1104 100644
+--- a/dom/webidl/ImageBitmap.webidl
++++ b/dom/webidl/ImageBitmap.webidl
+@@ -23,6 +23,11 @@ interface ImageBitmap {
+   readonly attribute unsigned long height;
+ };
+ 
++dictionary GetImageDataOptions {
++  ImageData? imageData = null;
++  boolean neuter = false;
++};
++
+ // It's crucial that there be a way to explicitly dispose of ImageBitmaps
+ // since they refer to potentially large graphics resources. Some uses
+ // of this API proposal will result in repeated allocations of ImageBitmaps,
+@@ -31,6 +36,9 @@ interface ImageBitmap {
+ // MessagePort. Potentially, all Transferable types should inherit from a
+ // new interface type "Closeable".
+ partial interface ImageBitmap {
++  [NewObject, Throws]
++  ImageData getImageData(double sx, double sy, double sw, double sh, optional GetImageDataOptions options = {});
++
+   // Dispose of all graphical resources associated with this ImageBitmap.
+   void close();
+ };

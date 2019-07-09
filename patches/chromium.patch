@@ -1,0 +1,179 @@
+diff --git a/third_party/blink/renderer/core/core_idl_files.gni b/third_party/blink/renderer/core/core_idl_files.gni
+index e93b9d0ab2..852912e181 100644
+--- a/third_party/blink/renderer/core/core_idl_files.gni
++++ b/third_party/blink/renderer/core/core_idl_files.gni
+@@ -671,6 +671,7 @@ core_dictionary_idl_files =
+                     "html/portal/portal_activate_options.idl",
+                     "html/track/track_event_init.idl",
+                     "imagebitmap/image_bitmap_options.idl",
++                    "imagebitmap/get_image_data_options.idl",
+                     "input/input_device_capabilities_init.idl",
+                     "input/touch_init.idl",
+                     "intersection_observer/intersection_observer_init.idl",
+diff --git a/third_party/blink/renderer/core/imagebitmap/image_bitmap.cc b/third_party/blink/renderer/core/imagebitmap/image_bitmap.cc
+index 64dedf2e3b..04c6a04725 100644
+--- a/third_party/blink/renderer/core/imagebitmap/image_bitmap.cc
++++ b/third_party/blink/renderer/core/imagebitmap/image_bitmap.cc
+@@ -1115,4 +1115,66 @@ FloatSize ImageBitmap::ElementSize(const FloatSize&) const {
+   return FloatSize(width(), height());
+ }
+ 
++ScriptPromise ImageBitmap::getImageData(
++    ScriptState* script_state,
++    int sx,
++    int sy,
++    int sw,
++    int sh,
++    const GetImageDataOptions* options) {
++
++  auto* resolver = MakeGarbageCollected<ScriptPromiseResolver>(script_state);
++  ScriptPromise promise = resolver->Promise();
++
++  ImageData* image_data = options->imageData();
++
++  if (IsNeutered()) {
++    resolver->Reject(MakeGarbageCollected<DOMException>(
++        DOMExceptionCode::kInvalidStateError, "ImageBitmap is neutered"));
++    return promise;
++  }
++
++  ImageDataColorSettings* color_settings = ImageDataColorSettings::Create();
++
++  IntRect image_data_rect(sx, sy, sw, sh);
++  CanvasColorParams color_params;
++
++  if (image_data == nullptr) {
++    WTF::ArrayBufferContents contents;
++
++    if (!StaticBitmapImage::ConvertToArrayBufferContents(
++            image_, contents, image_data_rect, color_params, IsAccelerated())) {
++      resolver->Reject(MakeGarbageCollected<DOMException>(
++          DOMExceptionCode::kInvalidStateError,
++          "The ImageBitmap could not be allocated."));
++      return promise;
++    }
++
++    DOMArrayBuffer* array_buffer = DOMArrayBuffer::Create(contents);
++
++    image_data = ImageData::Create(
++      image_data_rect.Size(),
++      NotShared<DOMUint8ClampedArray>(DOMUint8ClampedArray::Create(
++          array_buffer, 0, array_buffer->ByteLength())),
++      color_settings);
++  } else {
++    auto* buffer = image_data->BufferBase()->Buffer();
++
++    if (!StaticBitmapImage::CopyToBuffer(
++            image_, buffer->Data(), image_data_rect, color_params)) {
++      resolver->Reject(MakeGarbageCollected<DOMException>(
++          DOMExceptionCode::kInvalidStateError,
++          "The ImageBitmap could not be allocated."));
++      return promise;
++    }
++  }
++
++  if (options->neuter()){
++    close();
++  }
++
++  resolver->Resolve(image_data);
++  return promise;
++}
++
+ }  // namespace blink
+diff --git a/third_party/blink/renderer/core/imagebitmap/image_bitmap.h b/third_party/blink/renderer/core/imagebitmap/image_bitmap.h
+index bea78c0d82..05f554385a 100644
+--- a/third_party/blink/renderer/core/imagebitmap/image_bitmap.h
++++ b/third_party/blink/renderer/core/imagebitmap/image_bitmap.h
+@@ -10,6 +10,7 @@
+ #include "third_party/blink/renderer/core/core_export.h"
+ #include "third_party/blink/renderer/core/html/canvas/canvas_image_source.h"
+ #include "third_party/blink/renderer/core/html/canvas/image_element_base.h"
++#include "third_party/blink/renderer/core/imagebitmap/get_image_data_options.h"
+ #include "third_party/blink/renderer/core/imagebitmap/image_bitmap_options.h"
+ #include "third_party/blink/renderer/core/imagebitmap/image_bitmap_source.h"
+ #include "third_party/blink/renderer/platform/bindings/script_wrappable.h"
+@@ -133,6 +134,8 @@ class CORE_EXPORT ImageBitmap final : public ScriptWrappable,
+   scoped_refptr<StaticBitmapImage> Transfer();
+   void close();
+ 
++  ScriptPromise getImageData(ScriptState*, int sx, int sy, int sw, int sh, const GetImageDataOptions*);
++
+   ~ImageBitmap() override;
+ 
+   CanvasColorParams GetCanvasColorParams();
+diff --git a/third_party/blink/renderer/core/imagebitmap/image_bitmap.idl b/third_party/blink/renderer/core/imagebitmap/image_bitmap.idl
+index 706633c467..4de6f5b972 100644
+--- a/third_party/blink/renderer/core/imagebitmap/image_bitmap.idl
++++ b/third_party/blink/renderer/core/imagebitmap/image_bitmap.idl
+@@ -12,4 +12,5 @@
+     readonly attribute unsigned long width;
+     readonly attribute unsigned long height;
+     void close();
++    [CallWith=ScriptState] Promise<ImageData> getImageData([EnforceRange] long sx, [EnforceRange] long sy, [EnforceRange] long sw, [EnforceRange] long sh, optional GetImageDataOptions options);
+ };
+diff --git a/third_party/blink/renderer/platform/graphics/static_bitmap_image.cc b/third_party/blink/renderer/platform/graphics/static_bitmap_image.cc
+index 7c142e6f16..afc784f873 100644
+--- a/third_party/blink/renderer/platform/graphics/static_bitmap_image.cc
++++ b/third_party/blink/renderer/platform/graphics/static_bitmap_image.cc
+@@ -158,6 +158,34 @@ bool StaticBitmapImage::ConvertToArrayBufferContents(
+   return true;
+ }
+ 
++bool StaticBitmapImage::CopyToBuffer(
++    scoped_refptr<StaticBitmapImage> src_image,
++    void* buffer,
++    const IntRect& rect,
++    const CanvasColorParams& color_params) {
++
++  if (!src_image) {
++    return false;
++  }
++
++  SkColorType color_type =
++      (color_params.GetSkColorType() == kRGBA_F16_SkColorType)
++          ? kRGBA_F16_SkColorType
++          : kRGBA_8888_SkColorType;
++  SkImageInfo info = SkImageInfo::Make(
++      rect.Width(), rect.Height(), color_type, kUnpremul_SkAlphaType,
++      color_params.GetSkColorSpaceForSkSurfaces());
++  sk_sp<SkImage> sk_image = src_image->PaintImageForCurrentFrame().GetSkImage();
++  if (!sk_image)
++    return false;
++  bool read_pixels_successful = sk_image->readPixels(
++      info, buffer, info.minRowBytes(), rect.X(), rect.Y());
++  DCHECK(read_pixels_successful ||
++         !sk_image->bounds().intersect(SkIRect::MakeXYWH(
++             rect.X(), rect.Y(), info.width(), info.height())));
++  return true;
++}
++
+ const gpu::SyncToken& StaticBitmapImage::GetSyncToken() const {
+   static const gpu::SyncToken sync_token;
+   return sync_token;
+diff --git a/third_party/blink/renderer/platform/graphics/static_bitmap_image.h b/third_party/blink/renderer/platform/graphics/static_bitmap_image.h
+index 399fe35555..6012ca6e86 100644
+--- a/third_party/blink/renderer/platform/graphics/static_bitmap_image.h
++++ b/third_party/blink/renderer/platform/graphics/static_bitmap_image.h
+@@ -122,6 +122,11 @@ class PLATFORM_EXPORT StaticBitmapImage : public Image {
+       const IntRect&,
+       const CanvasColorParams&,
+       bool is_accelerated = false);
++  static bool CopyToBuffer(
++      scoped_refptr<StaticBitmapImage> src_image,
++      void* buffer,
++      const IntRect&,
++      const CanvasColorParams&);
+ 
+  protected:
+   // Helper for sub-classes
+diff --git a/third_party/blink/renderer/core/imagebitmap/get_image_data_options.idl b/third_party/blink/renderer/core/imagebitmap/get_image_data_options.idl
+new file mode 100644
+index 0000000000..a1c2529243
+--- /dev/null
++++ b/third_party/blink/renderer/core/imagebitmap/get_image_data_options.idl
+@@ -0,0 +1,4 @@
++dictionary GetImageDataOptions {
++    ImageData imageData = null;
++    boolean neuter = false;
++};
