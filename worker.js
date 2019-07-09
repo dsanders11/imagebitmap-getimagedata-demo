@@ -10,7 +10,7 @@ onmessage = async (event) => {
     const { width, height, buffer } = event.data.imageData;
     const data = new Uint8ClampedArray(buffer);
 
-    postMessage(getAverageColor(new Image(data, width, height)));
+    postMessage(getAverageColor(new ImageData(data, width, height)));
   } else if (event.data.type === 'ImageBitmap') {
     const imageBitmap = event.data.imageBitmap;
     const { method, options } = event.data.options;
