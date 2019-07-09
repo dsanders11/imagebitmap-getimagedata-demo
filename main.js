@@ -5,7 +5,17 @@ const hasImageCapture = Boolean(window.ImageCapture);
 document.querySelector('input[name="captureMethod"][value="ImageCapture.takePhoto"]').disabled = !Boolean(hasImageCapture && Object.keys(ImageCapture.prototype).includes('onphoto'));
 document.querySelector('input[name="captureMethod"][value="ImageCapture.grabFrame"]').disabled = !Boolean(hasImageCapture && ImageCapture.prototype.grabFrame);
 
-document.getElementById('OffscreenCanvas').disabled = !Boolean(OffscreenCanvas);
+let hasOffscreenCanvas = Boolean(window.OffscreenCanvas);
+
+if (hasOffscreenCanvas) {
+  try {
+    new OffscreenCanvas(1, 1).getContext('2d')
+  } catch {
+    hasOffscreenCanvas = false;
+  }
+}
+
+document.getElementById('OffscreenCanvas').disabled = hasOffscreenCanvas;
 
 const hasPatch = Boolean(window.ImageBitmap && ImageBitmap.prototype.getImageData);
 
@@ -82,8 +92,8 @@ function disableUI () {
 async function takePhotoCapturer () {
   return new Promise(resolve => {
     capturer.takePhoto();
-    capturer.onphoto = blob => {
-      resolve(createImageBitmap(blob));
+    capturer.onphoto = event => {
+      resolve(createImageBitmap(event.data));
     };
   })
 }

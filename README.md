@@ -33,17 +33,19 @@ TODO
 TODO
 
 Firefox implementation of `ImageCapture` is out of spec and only implements `takePhoto`, which returns
-a `Blob`, so there's an extra step using `createImageBitmap`.
+a `Blob`, so there's an extra step using `createImageBitmap`. It also only supports WebGL for `OffscreenCanvas`,
+so we can't use that either.
+
+**WARNING**: With Firefox the `CanvasRenderingContext2D` method tends to run off the rails quite quickly
+and will use a lot of memory and likely lock up the process.
 
 | Capture Method         |     ImageData Method     | GetImageData Options | FPS | Avg CPU | Avg Memory | Notes |
 |------------------------|:------------------------:|:--------------------:|:---:|:-------:|:----------:|:-----:|
 | HTMLVideoElement       | CanvasRenderingContext2D |          N/A         |     |         |            |       |
-| HTMLVideoElement       |      OffscreenCanvas     |          N/A         |     |         |            |       |
 | HTMLVideoElement       | ImageBitmap.getImageData |          None        |     |         |            |       |
 | HTMLVideoElement       | ImageBitmap.getImageData |       imageData      |     |         |            |       |
 | HTMLVideoElement       | ImageBitmap.getImageData |  imageData + neuter  |     |         |            |       |
 | ImageCapture.takePhoto | CanvasRenderingContext2D |          N/A         |     |         |            |       |
-| ImageCapture.takePhoto |      OffscreenCanvas     |          N/A         |     |         |            |       |
 | ImageCapture.takePhoto | ImageBitmap.getImageData |          None        |     |         |            |       |
 | ImageCapture.takePhoto | ImageBitmap.getImageData |       imageData      |     |         |            |       |
 | ImageCapture.takePhoto | ImageBitmap.getImageData |  imageData + neuter  |     |         |            |       |
