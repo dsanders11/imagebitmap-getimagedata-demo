@@ -14,13 +14,14 @@ document.getElementById('getImageDataOptions').disabled = !hasPatch;
 document.getElementById('getImageDataMethods').disabled = true;
 
 const videoEl = document.createElement('video');
+videoEl.autoplay = true;
+
 const canvasEl = document.createElement('canvas');
 const ctx = canvasEl.getContext('2d');
 
 let capturer = null;
 
 document.getElementById('startVideo').onclick = async (event) => {
-  document.getElementById('getImageDataMethods').disabled = false;
   document.getElementById('captureResolutions').disabled = true;
   event.target.disabled = true;
 
@@ -65,6 +66,10 @@ document.getElementById('startVideo').onclick = async (event) => {
   }
 
   videoEl.srcObject = mediaStream;
+
+  videoEl.oncanplay = () => {
+    document.getElementById('getImageDataMethods').disabled = false;
+  }
 }
 
 function disableUI () {
