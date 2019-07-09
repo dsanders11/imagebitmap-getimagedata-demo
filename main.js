@@ -20,6 +20,7 @@ const ctx = canvasEl.getContext('2d');
 let capturer = null;
 
 document.getElementById('startVideo').onclick = async (event) => {
+  document.getElementById('getImageDataMethods').disabled = true;
   document.getElementById('captureResolutions').disabled = true;
   event.target.disabled = true;
 
