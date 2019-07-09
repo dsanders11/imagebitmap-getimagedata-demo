@@ -47,13 +47,15 @@ document.getElementById('startVideo').onclick = async (event) => {
   canvasEl.width = width;
   canvasEl.height = height;
 
+  let mediaStream;
+
   try {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
+    mediaStream = await navigator.mediaDevices.getUserMedia({
       video: { width: { exact: width }, height: { exact: height } }
     })
   } catch (err) {
     console.error(err);
-    alert(err);
+    alert(err.name);
     return;
   }
 
