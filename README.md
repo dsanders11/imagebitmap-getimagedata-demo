@@ -9,11 +9,11 @@ amounts of large size garbage.
 It's worth noting that Firefox fails all versions of the current implementation due to
 running the test machine out of memory in under 5 seconds.
 
-# ImageBitmap Patches
+## ImageBitmap Patches
 
 There's a patch for both Chromium and Firefox. They can be found under the patches directory.
 
-# Results
+## Results
 
 All testing is done on a Raspberry Pi Model 3B+, which has 1 GB of memory. Camera is a Logitech
 C920 Pro. Swapfile is disabled during testing to avoid the uncertainty that might cause with the
@@ -24,11 +24,11 @@ Baseline memory usage for the system is 166 MB.
 
 All test runs involved a fresh start of the browser.
 
-## Chromium
+### Chromium
 
 The `neuter` option appears to have little effect on either CPU or memory usage.
 
-### 1080p
+#### 1080p
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |             Notes             |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:-----------------------------:|
@@ -43,7 +43,7 @@ The `neuter` option appears to have little effect on either CPU or memory usage.
 | ImageBitmap.getImageData | ImageCapture.grabFrame |       imageData      | 15  |  52.89  |   264 MB   | Fluctuated 13-22 FPS          |
 | ImageBitmap.getImageData | ImageCapture.grabFrame |  imageData + neuter  | 15  |  50.25  |   263 MB   | Fluctuated 13-22 FPS          |
 
-### 720p
+#### 720p
 
 **NOTE**: The `ImageCapture.grabFrame` implementation seems to limit frame requests to the camera frame rate,
 so an FPS of 30 using that capture method is effectively 'maxxed out'.
@@ -55,7 +55,7 @@ so an FPS of 30 using that capture method is effectively 'maxxed out'.
 | ImageBitmap.getImageData | HTMLVideoElement       |       imageData      | 14  |  46.82  |   250 MB   | Fluctuated 13-16 FPS          | 
 | ImageBitmap.getImageData | ImageCapture.grabFrame |       imageData      | 29  |  43.07  |   248 MB   | Fluctuated 28-30 FPS          |
 
-## Firefox
+### Firefox
 
 Firefox implementation of `ImageCapture` is out of spec and only implements `takePhoto`, which returns
 a `Blob`, so there's an extra step using `createImageBitmap`. It also only supports WebGL for `OffscreenCanvas`,
@@ -66,7 +66,7 @@ Interestingly average memory usage is lower when the `neuter` option is not used
 **WARNING**: With Firefox the `CanvasRenderingContext2D` method tends to run off the rails quite quickly
 and will use a lot of memory and likely lock up the process. It will crash a Raspberry Pi.
 
-### 1080p
+#### 1080p
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |           Notes          |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:------------------------:|
@@ -79,7 +79,7 @@ and will use a lot of memory and likely lock up the process. It will crash a Ras
 | ImageBitmap.getImageData | ImageCapture.takePhoto |       imageData      | 3-4 |  62.21  |   333 MB   |                          |
 | ImageBitmap.getImageData | ImageCapture.takePhoto |  imageData + neuter  | 3-4 |  62.72  |   354 MB   |                          |
 
-### 720p
+#### 720p
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |           Notes          |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:------------------------:|
