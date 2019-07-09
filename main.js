@@ -1,7 +1,8 @@
 // Feature detect
 const hasImageCapture = Boolean(window.ImageCapture);
 
-document.querySelector('input[name="captureMethod"][value="ImageCapture.takePhoto"]').disabled = !Boolean(hasImageCapture && ImageCapture.prototype.takePhoto);
+// takePhoto only supports the Firefox version
+document.querySelector('input[name="captureMethod"][value="ImageCapture.takePhoto"]').disabled = !Boolean(hasImageCapture && Object.keys(ImageCapture.prototype).includes('onphoto'));
 document.querySelector('input[name="captureMethod"][value="ImageCapture.grabFrame"]').disabled = !Boolean(hasImageCapture && ImageCapture.prototype.grabFrame);
 
 document.getElementById('OffscreenCanvas').disabled = !Boolean(OffscreenCanvas);
