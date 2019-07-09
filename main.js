@@ -123,9 +123,9 @@ function sendImageDataAndWait (imageData) {
     imageData: {
       width: imageData.width,
       height: imageData.height,
-      data: imageData.data
+      buffer: imageData.data.buffer
     }
-  }, [ imageData.data ]);
+  }, [ imageData.data.buffer ]);
 
   return new Promise(resolve => {
     worker.onmessage = resolve;

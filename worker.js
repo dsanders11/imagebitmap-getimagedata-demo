@@ -7,7 +7,8 @@ let offscreenCtx = null;
 
 onmessage = async (event) => {
   if (event.data.type === 'ImageData') {
-    const { width, height, data } = event.data.imageData;
+    const { width, height, buffer } = event.data.imageData;
+    const data = new Uint8ClampedArray(buffer);
 
     postMessage(getAverageColor(new Image(data, width, height)));
   } else if (event.data.type === 'ImageBitmap') {
