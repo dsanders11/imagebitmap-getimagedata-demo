@@ -15,7 +15,7 @@ if (hasOffscreenCanvas) {
   }
 }
 
-document.getElementById('OffscreenCanvas').disabled = hasOffscreenCanvas;
+document.getElementById('OffscreenCanvas').disabled = !hasOffscreenCanvas;
 
 const hasPatch = Boolean(window.ImageBitmap && ImageBitmap.prototype.getImageData);
 
