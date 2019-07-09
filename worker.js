@@ -23,12 +23,17 @@ onmessage = async (event) => {
       }
 
       offscreenCtx.drawImage(imageBitmap, 0, 0);
+      imageBitmap.close();
       postMessage(getAverageColor(offscreenCtx.getImageData(0, 0, width, height)));
     } else if (method === 'ImageBitmap') {
       imageData = await imageBitmap.getImageData(0, 0, width, height, {
         imageData: options.reuseImageData ? imageData : null,
         neuter: options.neuter,
       });
+
+      if (options.neuter) {
+        imageBitmap.close();
+      }
 
       postMessage(getAverageColor(imageData));
     }
