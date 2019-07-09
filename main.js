@@ -83,7 +83,7 @@ async function takePhotoCapturer () {
 }
 
 const capturers = {
-  'HTMLVideoElement': () => createImageBitmap(video),
+  'HTMLVideoElement': () => createImageBitmap(videoEl),
   'ImageCapture.takePhoto': takePhotoCapturer,
   'ImageCapture.grabFrame': () => capturer.grabFrame()
 }
