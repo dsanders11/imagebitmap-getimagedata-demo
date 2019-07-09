@@ -128,7 +128,9 @@ function sendImageDataAndWait (imageData) {
   }, [ imageData.data.buffer ]);
 
   return new Promise(resolve => {
-    worker.onmessage = resolve;
+    worker.onmessage = event => {
+      resolve(event.data);
+    };
   });
 }
 
@@ -140,7 +142,9 @@ function sendImageBitmapAndWait (imageBitmap, options) {
   }, [ imageBitmap ]);
 
   return new Promise(resolve => {
-    worker.onmessage = resolve;
+    worker.onmessage = event => {
+      resolve(event.data);
+    };
   });
 }
 
