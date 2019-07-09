@@ -63,7 +63,7 @@ document.getElementById('startVideo').onclick = async (event) => {
     capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
   }
 
-  video.srcObject = mediaStream;
+  videoEl.srcObject = mediaStream;
 }
 
 function disableUI () {
