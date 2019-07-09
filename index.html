@@ -16,26 +16,26 @@
   </head>
   <body>
     <fieldset id="captureResolutions">
-      <p>Capture Resolution</p>
+      <p>Video Resolution</p>
       <input type="radio" name="captureResolution" value="1080p" checked> 1080p<br>
       <input type="radio" name="captureResolution" value="720p"> 720p<br>
       <input type="radio" name="captureResolution" value="480p"> 480p<br>
     </fieldset>
     <br>
-    <fieldset id="captureMethods">
+    <fieldset id="captureMethods" disabled>
       <p>ImageBitmap Capture Method</p>
       <input type="radio" name="captureMethod" value="HTMLVideoElement" checked> HTMLVideoElement<br>
       <input type="radio" name="captureMethod" value="ImageCapture.takePhoto"> ImageCapture.takePhoto<br>
       <input type="radio" name="captureMethod" value="ImageCapture.grabFrame"> ImageCapture.grabFrame<br>
     </fieldset>
     <br>
-    <fieldset id="getImageDataOptions">
+    <fieldset id="getImageDataOptions" disabled>
       <p>ImageBitmap.getImageData Options</p>
       <input type="checkbox" name="reuseImageData" checked> imageData<br>
       <input type="checkbox" name="neuter" checked> neuter<br>
     </fieldset>
     <br>
-    <fieldset id="getImageDataMethods">
+    <fieldset id="getImageDataMethods" disabled>
       <p>getImageData Method</p>
       <button type="button" id="CanvasRenderingContext2D">CanvasRenderingContext2D</button>
       <button type="button" id="OffscreenCanvas">OffscreenCanvas</button>

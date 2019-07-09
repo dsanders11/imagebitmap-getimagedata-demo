@@ -79,6 +79,7 @@ document.getElementById('startVideo').onclick = async (event) => {
   videoEl.srcObject = mediaStream;
 
   videoEl.oncanplay = () => {
+    document.getElementById('captureMethods').disabled = false;
     document.getElementById('getImageDataMethods').disabled = false;
   }
 }
