@@ -33,12 +33,13 @@ const ctx = canvasEl.getContext('2d');
 let capturer = null;
 
 document.getElementById('startVideo').onclick = async (event) => {
-  document.getElementById('captureResolutions').disabled = true;
+  document.getElementById('videoCaptureFieldset').disabled = true;
   event.target.disabled = true;
 
   let width, height;
 
   const captureResolution = document.querySelector('[name="captureResolution"]:checked').value;
+  const captureFrameRate = parseInt(document.querySelector('[name="captureFrameRate"]:checked').value);
 
   switch (captureResolution) {
     case '1080p':
@@ -64,7 +65,11 @@ document.getElementById('startVideo').onclick = async (event) => {
 
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { exact: width }, height: { exact: height } }
+      video: {
+        width: { exact: width },
+        height: { exact: height },
+        frameRate: { exact: captureFrameRate }
+      }
     })
   } catch (err) {
     console.error(err);

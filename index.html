@@ -15,11 +15,16 @@
     </style>
   </head>
   <body>
-    <fieldset id="captureResolutions">
+    <fieldset id="videoCaptureFieldset">
       <p>Video Resolution</p>
       <input type="radio" name="captureResolution" value="1080p" checked> 1080p<br>
       <input type="radio" name="captureResolution" value="720p"> 720p<br>
       <input type="radio" name="captureResolution" value="480p"> 480p<br>
+      <br>
+      <p>Frame Rate</p>
+      <input type="radio" name="captureFrameRate" value="30" checked> 30<br>
+      <input type="radio" name="captureFrameRate" value="20"> 20<br>
+      <input type="radio" name="captureFrameRate" value="1"> 1<br>
       <br>
       <button type="button" id="startVideo">Start Video</button>
     </fieldset>
