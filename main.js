@@ -212,6 +212,8 @@ async function runForever (capturer, getImageDataMethod) {
   const fpsCounter = document.getElementById('fps');
   const workerFPS = document.getElementById('workerFPS');
 
+  const mean = (array) => array.reduce((a, b) => a + b) / array.length;
+
   while (true) {
     const frame = await capturer();
 
@@ -231,6 +233,6 @@ async function runForever (capturer, getImageDataMethod) {
 
     avgColor.style.background = `rgb(${result.join(',')})`;
     fpsCounter.innerText = `Overall: ${fps} FPS`;
-    workerFPS.innerText = `Worker: ${(1000/(workerTimings/workerTimings.length)).toFixed(2)} FPS`;
+    workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(2)} FPS`;
   }
 }
