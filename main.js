@@ -224,7 +224,7 @@ async function runForever (capturer, getImageDataMethod) {
     const result = await getAndProcess(frame);
     const now = performance.now();
 
-    workerTimings.push(now - start);
+    workerTimings.unshift(now - start);
     workerTimings = workerTimings.slice(0, 5);
 
     runs.push(now);
