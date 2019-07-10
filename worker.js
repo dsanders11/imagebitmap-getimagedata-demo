@@ -6,12 +6,16 @@ let offscreenCanvas = null;
 let offscreenCtx = null;
 
 onmessage = async (event) => {
-  if (event.data.type === 'ImageData') {
+  const { type: payloadType, workerNoOp } = event.data;
+
+  if (workerNoOp) {
+    postMessage([ 0, 0, 0 ]);
+  } else if (payloadType === 'ImageData') {
     const { width, height, buffer } = event.data.imageData;
     const data = new Uint8ClampedArray(buffer);
 
     postMessage(getAverageColor(new ImageData(data, width, height)));
-  } else if (event.data.type === 'ImageBitmap') {
+  } else if (payloadType === 'ImageBitmap') {
     const imageBitmap = event.data.imageBitmap;
     const { width, height } = imageBitmap;
     const { method, options } = event.data.options;

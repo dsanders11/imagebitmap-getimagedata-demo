@@ -146,7 +146,8 @@ function sendImageDataAndWait (imageData) {
       width: imageData.width,
       height: imageData.height,
       buffer: imageData.data.buffer
-    }
+    },
+    workerNoOp: document.querySelector('[name="workerNoOp"]').checked
   }, [ imageData.data.buffer ]);
 
   return new Promise(resolve => {
@@ -160,7 +161,8 @@ function sendImageBitmapAndWait (imageBitmap, options) {
   worker.postMessage({
     type: 'ImageBitmap',
     imageBitmap,
-    options
+    options,
+    workerNoOp: document.querySelector('[name="workerNoOp"]').checked
   }, [ imageBitmap ]);
 
   return new Promise(resolve => {
