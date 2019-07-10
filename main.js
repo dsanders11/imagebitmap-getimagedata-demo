@@ -206,6 +206,7 @@ async function runForever (capturer, getImageDataMethod) {
   }
 
   let runs = [];
+  let workerTimings = [];
 
   const avgColor = document.getElementById('avgColor');
   const fpsCounter = document.getElementById('fps');
@@ -219,6 +220,9 @@ async function runForever (capturer, getImageDataMethod) {
     const result = await getAndProcess(frame);
     const now = performance.now();
 
+    workerTimings.push(now - start);
+    workerTimings = workerTimings.slice(0, 5);
+
     runs.push(now);
     
     const secondAgo = now - 1000;
@@ -227,6 +231,6 @@ async function runForever (capturer, getImageDataMethod) {
 
     avgColor.style.background = `rgb(${result.join(',')})`;
     fpsCounter.innerText = `Overall: ${fps} FPS`;
-    workerFPS.innerText = `Worker: ${1000/(now - start)} FPS`;
+    workerFPS.innerText = `Worker: ${(1000/(workerTimings/workerTimings.length)).toFixed(2)} FPS`;
   }
 }
