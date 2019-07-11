@@ -20,7 +20,6 @@ document.getElementById('OffscreenCanvas').disabled = !hasOffscreenCanvas;
 const hasPatch = Boolean(window.ImageBitmap && ImageBitmap.prototype.getImageData);
 
 document.getElementById('ImageBitmap-getImageData').disabled = !hasPatch;
-document.getElementById('getImageDataOptions').disabled = !hasPatch;
 
 document.getElementById('getImageDataMethods').disabled = true;
 
@@ -85,6 +84,7 @@ document.getElementById('startVideo').onclick = async (event) => {
 
   videoEl.oncanplay = () => {
     document.getElementById('captureMethods').disabled = false;
+    document.getElementById('getImageDataOptions').disabled = !hasPatch;
     document.getElementById('getImageDataMethods').disabled = false;
   }
 }
