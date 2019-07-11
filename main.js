@@ -225,13 +225,13 @@ async function runForever (captureFrame, getImageDataMethod) {
     const now = performance.now();
 
     workerTimings.unshift(now - start);
-    workerTimings = workerTimings.slice(0, 30);
+    workerTimings = workerTimings.slice(0, 60);
 
     runs.push(now);
     
-    const secondAgo = now - 1000;
-    runs = runs.filter(run => run >= secondAgo);
-    const fps = runs.length;
+    const timeCutoff = now - 2000;
+    runs = runs.filter(run => run >= timeCutoff);
+    const fps = runs.length/2;
 
     avgColor.style.background = `rgb(${result.join(',')})`;
     fpsCounter.innerText = `Overall: ${fps} FPS`;
