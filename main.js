@@ -235,6 +235,6 @@ async function runForever (capturer, getImageDataMethod) {
 
     avgColor.style.background = `rgb(${result.join(',')})`;
     fpsCounter.innerText = `Overall: ${fps} FPS`;
-    workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(2)} FPS`;
+    workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(0)} FPS`;
   }
 }
