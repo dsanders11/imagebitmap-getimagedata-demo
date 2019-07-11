@@ -13,7 +13,7 @@ running the test machine out of memory in under 5 seconds.
 
 There's a patch for both Chromium and Firefox. They can be found under the patches directory.
 
-## Results
+## Testing
 
 All testing is done on a Raspberry Pi Model 3B+, which has 1 GB of memory. Camera is a Logitech
 C920 Pro. Swapfile is disabled during testing to avoid the uncertainty that might cause with the
@@ -23,6 +23,14 @@ Average CPU and memory usage data were gathered at 5 second intervals over a 2 m
 Baseline memory usage for the system is 166 MB.
 
 All test runs involved a fresh start of the browser.
+
+## Results
+
+As of the time of this testing (July 2019), Firefox is unable to run this test scenario on the Pi
+without crashing the system due to OOM. On Chromium the new `ImageBitmap.getImageData` code path
+offers superior performance to `OffscreenCanvas`, with the worker FPS clocking in at 60 FPS vs 5 FPS.
+The improvement is significant enough that the bottleneck is moved to elsewhere in the Chromium code,
+with the `getImageData` code path performing well enough to handle 1080p@30.
 
 ### Chromium
 
