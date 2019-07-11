@@ -111,27 +111,19 @@ const frameCapturers = {
 }
 
 document.getElementById('CanvasRenderingContext2D').onclick = () => {
-  disableUI();
-
-  const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
-
-  runForever(frameCapturers[captureMethod], 'CanvasRenderingContext2D');
+  runForever('CanvasRenderingContext2D');
 }
 
 document.getElementById('OffscreenCanvas').onclick = () => {
-  disableUI();
-
-  const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
-
-  runForever(frameCapturers[captureMethod], 'OffscreenCanvas');
+  runForever('OffscreenCanvas');
 }
 
 document.getElementById('ImageBitmap-getImageData').onclick = () => {
-  disableUI();
+  runForever('ImageBitmap-getImageData');
+}
 
-  const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
-
-  runForever(frameCapturers[captureMethod], 'ImageBitmap-getImageData');
+document.getElementById('workerNoOp').onclick = () => {
+  runForever(null);
 }
 
 const worker = new Worker('./worker.js');
@@ -143,8 +135,7 @@ function sendImageDataAndWait (imageData) {
       width: imageData.width,
       height: imageData.height,
       buffer: imageData.data.buffer
-    },
-    workerNoOp: document.querySelector('[name="workerNoOp"]').checked
+    }
   }, [ imageData.data.buffer ]);
 
   return new Promise(resolve => {
@@ -158,8 +149,7 @@ function sendImageBitmapAndWait (imageBitmap, options) {
   worker.postMessage({
     type: 'ImageBitmap',
     imageBitmap,
-    options,
-    workerNoOp: document.querySelector('[name="workerNoOp"]').checked
+    options
   }, [ imageBitmap ]);
 
   return new Promise(resolve => {
@@ -169,10 +159,32 @@ function sendImageBitmapAndWait (imageBitmap, options) {
   });
 }
 
-async function runForever (captureFrame, getImageDataMethod) {
+function sendWorkerNoOp (imageBitmap) {
+  worker.postMessage({
+    type: 'NoOp',
+    imageBitmap
+  }, [ imageBitmap ]);
+
+  return new Promise(resolve => {
+    worker.onmessage = event => {
+      resolve(event.data);
+    };
+  });
+}
+
+async function runForever (getImageDataMethod) {
+  disableUI();
+
+  const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
+  const captureFrame = frameCapturers[captureMethod];
+
   let processFrame;
 
   switch (getImageDataMethod) {
+    case null:
+      processFrame = sendWorkerNoOp;
+      break;
+
     case 'CanvasRenderingContext2D':
       processFrame = (frame) => {
         // getImageData happens on main thread
@@ -235,6 +247,11 @@ async function runForever (captureFrame, getImageDataMethod) {
 
     avgColor.style.background = `rgb(${result.join(',')})`;
     fpsCounter.innerText = `Overall: ${fps.toFixed(0)} FPS`;
-    workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(0)} FPS`;
+
+    if (getImageDataMethod === null) {
+      workerFPS.innerText = '';
+    } else {
+      workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(0)} FPS`;
+    }
   }
 }

@@ -6,9 +6,9 @@ let offscreenCanvas = null;
 let offscreenCtx = null;
 
 onmessage = async (event) => {
-  const { type: payloadType, workerNoOp } = event.data;
+  const { type: payloadType } = event.data;
 
-  if (workerNoOp) {
+  if (payloadType === 'NoOp') {
     postMessage([ 0, 0, 0 ]);
   } else if (payloadType === 'ImageData') {
     const { width, height, buffer } = event.data.imageData;
