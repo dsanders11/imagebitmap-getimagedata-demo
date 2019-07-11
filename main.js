@@ -173,11 +173,11 @@ function sendImageBitmapAndWait (imageBitmap, options) {
 }
 
 async function runForever (capturer, getImageDataMethod) {
-  let getAndProcess;
+  let processFrame;
 
   switch (getImageDataMethod) {
     case 'CanvasRenderingContext2D':
-      getAndProcess = (frame) => {
+      processFrame = (frame) => {
         // getImageData happens on main thread
         ctx.drawImage(frame, 0, 0);
         const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
@@ -186,7 +186,7 @@ async function runForever (capturer, getImageDataMethod) {
       break;
 
     case 'OffscreenCanvas':
-      getAndProcess = (frame) => {
+      processFrame = (frame) => {
         return sendImageBitmapAndWait(frame, {
           method: 'OffscreenCanvas'
         });
@@ -194,7 +194,7 @@ async function runForever (capturer, getImageDataMethod) {
       break;
 
     case 'ImageBitmap-getImageData':
-      getAndProcess = (frame) => {
+      processFrame = (frame) => {
         const options = {
           reuseImageData: document.querySelector('[name="reuseImageData"]').checked,
           neuter: document.querySelector('[name="neuter"]').checked
@@ -221,7 +221,7 @@ async function runForever (capturer, getImageDataMethod) {
 
     // Measure the run time of the worker for the frame
     const start = performance.now();
-    const result = await getAndProcess(frame);
+    const result = await processFrame(frame);
     const now = performance.now();
 
     workerTimings.unshift(now - start);
