@@ -36,7 +36,7 @@ with the `getImageData` code path performing well enough to handle 1080p@30.
 
 The `neuter` option appears to have little effect on either CPU or memory usage.
 
-#### 1080p
+#### 1080p@30
 
 The results for `ImageBitmap.getImageData` usage with `ImageCapture.grabFrame` seem to be
 bottlenecked by the 'Utility: Video Capture' process in Chromium, which decodes video frames
@@ -58,7 +58,7 @@ CPU room to spare. If the bottleneck was removed, it looks like the FPS could li
 | ImageBitmap.getImageData | ImageCapture.grabFrame |       imageData      | 15  |  52.89  |   264 MB   | Fluctuated 13-22 FPS          |
 | ImageBitmap.getImageData | ImageCapture.grabFrame |  imageData + neuter  | 15  |  50.25  |   263 MB   | Fluctuated 13-22 FPS          |
 
-#### 720p
+#### 720p@30
 
 **NOTE**: The `ImageCapture.grabFrame` implementation seems to limit frame requests to the camera frame rate,
 so an FPS of 30 using that capture method is effectively 'maxxed out'.
@@ -81,7 +81,7 @@ Interestingly average memory usage is lower when the `neuter` option is not used
 **WARNING**: With Firefox the `CanvasRenderingContext2D` method tends to run off the rails quite quickly
 and will use a lot of memory and likely lock up the process. It will crash a Raspberry Pi.
 
-#### 1080p
+#### 1080p@30
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |           Notes          |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:------------------------:|
@@ -94,7 +94,7 @@ and will use a lot of memory and likely lock up the process. It will crash a Ras
 | ImageBitmap.getImageData | ImageCapture.takePhoto |       imageData      | 3-4 |  62.21  |   333 MB   |                          |
 | ImageBitmap.getImageData | ImageCapture.takePhoto |  imageData + neuter  | 3-4 |  62.72  |   354 MB   |                          |
 
-#### 720p
+#### 720p@30
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |           Notes          |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:------------------------:|
