@@ -104,7 +104,7 @@ async function takePhotoCapturer () {
   })
 }
 
-const capturers = {
+const frameCapturers = {
   'HTMLVideoElement': () => createImageBitmap(videoEl),
   'ImageCapture.takePhoto': takePhotoCapturer,
   'ImageCapture.grabFrame': () => capturer.grabFrame()
@@ -114,27 +114,24 @@ document.getElementById('CanvasRenderingContext2D').onclick = () => {
   disableUI();
 
   const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
-  const capturer = capturers[captureMethod];
 
-  runForever(capturer, 'CanvasRenderingContext2D');
+  runForever(frameCapturers[captureMethod], 'CanvasRenderingContext2D');
 }
 
 document.getElementById('OffscreenCanvas').onclick = () => {
   disableUI();
 
   const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
-  const capturer = capturers[captureMethod];
 
-  runForever(capturer, 'OffscreenCanvas');
+  runForever(frameCapturers[captureMethod], 'OffscreenCanvas');
 }
 
 document.getElementById('ImageBitmap-getImageData').onclick = () => {
   disableUI();
 
   const captureMethod = document.querySelector('[name="captureMethod"]:checked').value;
-  const capturer = capturers[captureMethod];
 
-  runForever(capturer, 'ImageBitmap-getImageData');
+  runForever(frameCapturers[captureMethod], 'ImageBitmap-getImageData');
 }
 
 const worker = new Worker('./worker.js');
@@ -172,7 +169,7 @@ function sendImageBitmapAndWait (imageBitmap, options) {
   });
 }
 
-async function runForever (capturer, getImageDataMethod) {
+async function runForever (captureFrame, getImageDataMethod) {
   let processFrame;
 
   switch (getImageDataMethod) {
@@ -216,12 +213,15 @@ async function runForever (capturer, getImageDataMethod) {
 
   const mean = (array) => array.reduce((a, b) => a + b) / array.length;
 
+  let framePromise = captureFrame();
+
   while (true) {
-    const frame = await capturer();
+    const resultPromise = processFrame(await framePromise);
+    framePromise = captureFrame();
 
     // Measure the run time of the worker for the frame
     const start = performance.now();
-    const result = await processFrame(frame);
+    const result = await resultPromise;
     const now = performance.now();
 
     workerTimings.unshift(now - start);
