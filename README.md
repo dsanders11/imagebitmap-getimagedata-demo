@@ -30,6 +30,13 @@ The `neuter` option appears to have little effect on either CPU or memory usage.
 
 #### 1080p
 
+The results for `ImageBitmap.getImageData` usage with `ImageCapture.grabFrame` seem to be
+bottlenecked by the 'Utility: Video Capture' process in Chromium, which decodes video frames
+on a single thread sequentially. At 1080p this appears to max out the CPU for that thread
+and become the bottleneck, while the worker performing `ImageBitmap.getImageData` still has
+CPU room to spare. If the bottleneck was removed, it looks like the FPS could likely hit the
+30 FPS mark, given that the worker processes frames fast enough for 60+ FPS.
+
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |             Notes             |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:-----------------------------:|
 | CanvasRenderingContext2D | HTMLVideoElement       |          N/A         |  6  |  48.21  |   290 MB   | Memory usage peaked at 340 MB |
