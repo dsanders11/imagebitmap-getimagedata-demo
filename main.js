@@ -128,6 +128,12 @@ document.getElementById('workerNoOp').onclick = () => {
 
 const worker = new Worker('./worker.js');
 
+let pendingPromiseResolver = null;
+
+worker.onmessage = event => {
+  pendingPromiseResolver(event.data);
+};
+
 function sendImageDataAndWait (imageData) {
   worker.postMessage({
     type: 'ImageData',
@@ -139,9 +145,7 @@ function sendImageDataAndWait (imageData) {
   }, [ imageData.data.buffer ]);
 
   return new Promise(resolve => {
-    worker.onmessage = event => {
-      resolve(event.data);
-    };
+    pendingPromiseResolver = resolve;
   });
 }
 
@@ -153,9 +157,7 @@ function sendImageBitmapAndWait (imageBitmap, options) {
   }, [ imageBitmap ]);
 
   return new Promise(resolve => {
-    worker.onmessage = event => {
-      resolve(event.data);
-    };
+    pendingPromiseResolver = resolve;
   });
 }
 
@@ -166,9 +168,7 @@ function sendWorkerNoOp (imageBitmap) {
   }, [ imageBitmap ]);
 
   return new Promise(resolve => {
-    worker.onmessage = event => {
-      resolve(event.data);
-    };
+    pendingPromiseResolver = resolve;
   });
 }
 
@@ -203,11 +203,12 @@ async function runForever (getImageDataMethod) {
       break;
 
     case 'ImageBitmap-getImageData':
+      const options = {
+        reuseImageData: document.querySelector('[name="reuseImageData"]').checked,
+        neuter: document.querySelector('[name="neuter"]').checked
+      };
+
       processFrame = (frame) => {
-        const options = {
-          reuseImageData: document.querySelector('[name="reuseImageData"]').checked,
-          neuter: document.querySelector('[name="neuter"]').checked
-        }
         return sendImageBitmapAndWait(frame, {
           method: 'ImageBitmap',
           options
