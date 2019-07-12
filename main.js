@@ -204,7 +204,7 @@ async function runForever (getImageDataMethod) {
 
     case 'ImageBitmap-getImageData':
       const options = {
-        reuseImageData: document.querySelector('[name="reuseImageData"]').checked,
+        reuseBuffer: document.querySelector('[name="reuseBuffer"]').checked,
         neuter: document.querySelector('[name="neuter"]').checked
       };
 

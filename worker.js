@@ -1,7 +1,7 @@
 const xStride = 10;
 const yStride = 10;
 
-let imageData = null;
+let buffer = null;
 let offscreenCanvas = null;
 let offscreenCtx = null;
 
@@ -30,10 +30,11 @@ onmessage = async (event) => {
       imageBitmap.close();
       postMessage(getAverageColor(offscreenCtx.getImageData(0, 0, width, height)));
     } else if (method === 'ImageBitmap') {
-      imageData = await imageBitmap.getImageData(0, 0, width, height, {
-        imageData: options.reuseImageData ? imageData : null,
-        neuter: options.neuter,
+      const imageData = await imageBitmap.getImageData(0, 0, width, height, {
+        buffer: options.reuseBuffer ? buffer : null,
+        neuter: options.neuter
       });
+      buffer = imageData.data.buffer;
 
       if (!options.neuter) {
         imageBitmap.close();
