@@ -3,6 +3,10 @@ const hasImageCapture = Boolean(window.ImageCapture);
 
 // takePhoto only supports the Firefox version
 document.querySelector('input[name="captureMethod"][value="ImageCapture.takePhoto"]').disabled = !Boolean(hasImageCapture && Object.keys(ImageCapture.prototype).includes('onphoto'));
+
+// onframe is patched in
+document.querySelector('input[name="captureMethod"][value="ImageCapture.onframe"]').disabled = !Boolean(hasImageCapture && Object.keys(ImageCapture.prototype).includes('onframe'));
+
 document.querySelector('input[name="captureMethod"][value="ImageCapture.grabFrame"]').disabled = !Boolean(hasImageCapture && ImageCapture.prototype.grabFrame);
 
 let hasOffscreenCanvas = Boolean(window.OffscreenCanvas);
@@ -30,8 +34,10 @@ const canvasEl = document.createElement('canvas');
 const ctx = canvasEl.getContext('2d');
 
 let mediaStream;
-let capturer = null;
 let videoStarted = false;
+
+let capturer = null;
+let pendingOnFramePromiseResolver = null;
 
 document.getElementById('startVideo').onclick = async (event) => {
   document.getElementById('videoCaptureFieldset').disabled = true;
@@ -122,6 +128,18 @@ const frameCapturers = {
     }
 
     return capturer.grabFrame()
+  },
+  'ImageCapture.onframe': () => {
+    if (capturer === null) {
+      capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
+      capturer.onframe = (event) => {
+        pendingOnFramePromiseResolver(event.frame);
+      }
+    }
+
+    return new Promise(resolve => {
+      pendingOnFramePromiseResolver = resolve;
+    });
   }
 }
 
@@ -143,10 +161,10 @@ document.getElementById('workerNoOp').onclick = () => {
 
 const worker = new Worker('./worker.js');
 
-let pendingPromiseResolver = null;
+let pendingWorkerPromiseResolver = null;
 
 worker.onmessage = event => {
-  pendingPromiseResolver(event.data);
+  pendingWorkerPromiseResolver(event.data);
 };
 
 function sendImageDataAndWait (imageData) {
@@ -160,7 +178,7 @@ function sendImageDataAndWait (imageData) {
   }, [ imageData.data.buffer ]);
 
   return new Promise(resolve => {
-    pendingPromiseResolver = resolve;
+    pendingWorkerPromiseResolver = resolve;
   });
 }
 
@@ -172,7 +190,7 @@ function sendImageBitmapAndWait (imageBitmap, options) {
   }, [ imageBitmap ]);
 
   return new Promise(resolve => {
-    pendingPromiseResolver = resolve;
+    pendingWorkerPromiseResolver = resolve;
   });
 }
 
@@ -183,7 +201,7 @@ function sendWorkerNoOp (imageBitmap) {
   }, [ imageBitmap ]);
 
   return new Promise(resolve => {
-    pendingPromiseResolver = resolve;
+    pendingWorkerPromiseResolver = resolve;
   });
 }
 
