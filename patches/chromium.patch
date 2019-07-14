@@ -14,7 +14,7 @@ diff --git a/third_party/blink/renderer/core/imagebitmap/image_bitmap.cc b/third
 index 64dedf2e3b..04c6a04725 100644
 --- a/third_party/blink/renderer/core/imagebitmap/image_bitmap.cc
 +++ b/third_party/blink/renderer/core/imagebitmap/image_bitmap.cc
-@@ -1115,4 +1115,66 @@ FloatSize ImageBitmap::ElementSize(const FloatSize&) const {
+@@ -1115,4 +1117,78 @@ FloatSize ImageBitmap::ElementSize(const FloatSize&) const {
    return FloatSize(width(), height());
  }
  
@@ -29,7 +29,7 @@ index 64dedf2e3b..04c6a04725 100644
 +  auto* resolver = MakeGarbageCollected<ScriptPromiseResolver>(script_state);
 +  ScriptPromise promise = resolver->Promise();
 +
-+  ImageData* image_data = options->imageData();
++  DOMArrayBuffer* buffer = options->buffer();
 +
 +  if (IsNeutered()) {
 +    resolver->Reject(MakeGarbageCollected<DOMException>(
@@ -42,9 +42,31 @@ index 64dedf2e3b..04c6a04725 100644
 +  IntRect image_data_rect(sx, sy, sw, sh);
 +  CanvasColorParams color_params;
 +
-+  if (image_data == nullptr) {
-+    WTF::ArrayBufferContents contents;
++  WTF::ArrayBufferContents contents;
 +
++  if (buffer != nullptr) {
++    if (buffer->IsNeutered()) {
++      resolver->Reject(MakeGarbageCollected<DOMException>(
++          DOMExceptionCode::kInvalidStateError,
++          "Supplied buffer is neutered."));
++      return promise;
++    }
++
++    if (!buffer->Transfer(v8::Isolate::GetCurrent(), contents)) {
++      resolver->Reject(MakeGarbageCollected<DOMException>(
++          DOMExceptionCode::kInvalidStateError,
++          "The ImageBitmap could not be allocated."));
++      return promise;
++    }
++
++    if (!StaticBitmapImage::CopyToBuffer(
++            image_, contents.Data(), image_data_rect, color_params)) {
++      resolver->Reject(MakeGarbageCollected<DOMException>(
++          DOMExceptionCode::kInvalidStateError,
++          "The ImageBitmap could not be allocated."));
++      return promise;
++    }
++  } else {
 +    if (!StaticBitmapImage::ConvertToArrayBufferContents(
 +            image_, contents, image_data_rect, color_params, IsAccelerated())) {
 +      resolver->Reject(MakeGarbageCollected<DOMException>(
@@ -52,27 +74,17 @@ index 64dedf2e3b..04c6a04725 100644
 +          "The ImageBitmap could not be allocated."));
 +      return promise;
 +    }
-+
-+    DOMArrayBuffer* array_buffer = DOMArrayBuffer::Create(contents);
-+
-+    image_data = ImageData::Create(
-+      image_data_rect.Size(),
-+      NotShared<DOMUint8ClampedArray>(DOMUint8ClampedArray::Create(
-+          array_buffer, 0, array_buffer->ByteLength())),
-+      color_settings);
-+  } else {
-+    auto* buffer = image_data->BufferBase()->Buffer();
-+
-+    if (!StaticBitmapImage::CopyToBuffer(
-+            image_, buffer->Data(), image_data_rect, color_params)) {
-+      resolver->Reject(MakeGarbageCollected<DOMException>(
-+          DOMExceptionCode::kInvalidStateError,
-+          "The ImageBitmap could not be allocated."));
-+      return promise;
-+    }
 +  }
 +
-+  if (options->neuter()){
++  DOMArrayBuffer* array_buffer = DOMArrayBuffer::Create(contents);
++
++  ImageData* image_data = ImageData::Create(
++    image_data_rect.Size(),
++    NotShared<DOMUint8ClampedArray>(DOMUint8ClampedArray::Create(
++        array_buffer, 0, array_buffer->ByteLength())),
++    color_settings);
++
++  if (options->neuter()) {
 +    close();
 +  }
 +
@@ -174,6 +186,6 @@ index 0000000000..a1c2529243
 +++ b/third_party/blink/renderer/core/imagebitmap/get_image_data_options.idl
 @@ -0,0 +1,4 @@
 +dictionary GetImageDataOptions {
-+    ImageData? imageData = null;
++    ArrayBuffer? buffer;
 +    boolean neuter = false;
 +};
