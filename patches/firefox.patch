@@ -1,8 +1,8 @@
 diff --git a/dom/canvas/ImageBitmap.cpp b/dom/canvas/ImageBitmap.cpp
-index 9c178711f295..e4d1f010c61c 100644
+index 9c178711f295..956c82725ee2 100644
 --- a/dom/canvas/ImageBitmap.cpp
 +++ b/dom/canvas/ImageBitmap.cpp
-@@ -461,6 +461,118 @@ JSObject* ImageBitmap::WrapObject(JSContext* aCx,
+@@ -461,6 +461,124 @@ JSObject* ImageBitmap::WrapObject(JSContext* aCx,
    return ImageBitmap_Binding::Wrap(aCx, this, aGivenProto);
  }
  
@@ -67,9 +67,9 @@ index 9c178711f295..e4d1f010c61c 100644
 +    return nullptr;
 +  }
 +
-+  RefPtr<ImageData> imageData = options.mImageData;
++  RefPtr<ImageData> imageData;
 +
-+  if (!imageData) {
++  if (!options.mBuffer.WasPassed() || options.mBuffer.Value().IsNull()) {
 +    JSContext* context = nsContentUtils::GetCurrentJSContext();
 +    JS::Rooted<JSObject*> darray(context, JS_NewUint8ClampedArray(context, len.value()));
 +
@@ -91,12 +91,13 @@ index 9c178711f295..e4d1f010c61c 100644
 +
 +    imageData = new ImageData(w, h, *darray);
 +  } else {
-+    JSObject* darray = imageData->GetDataObject();
++    JSContext* context = nsContentUtils::GetCurrentJSContext();
++    JS::Rooted<JSObject*> buffer(context, options.mBuffer.Value().Value().Obj());
++    uint8_t* data = nullptr;
 +
 +    do {
-+      JS::AutoCheckCannotGC nogc;
-+      bool isShared;
-+      uint8_t* data = JS_GetUint8ClampedArrayData(darray, &isShared, nogc);
++      // Steal the data, which detaches the passed in buffer
++      data = static_cast<uint8_t*>(StealArrayBufferContents(context, buffer));
 +
 +      uint32_t srcStride = rawData.mStride;
 +      uint8_t* src =
@@ -107,6 +108,11 @@ index 9c178711f295..e4d1f010c61c 100644
 +      SwizzleData(src, srcStride, SurfaceFormat::X8R8G8B8_UINT32, dst,
 +                  w * 4, SurfaceFormat::R8G8B8A8, dstWriteRect.Size());
 +    } while (false);
++
++    JS::Rooted<JSObject*> new_buffer(context, JS::NewArrayBufferWithContents(context, len.value(), data));
++    JS::Rooted<JSObject*> darray(context, JS_NewUint8ClampedArrayWithBuffer(context, new_buffer, 0, -1));
++
++    imageData = new ImageData(w, h, *darray);
 +  }
 +
 +  readback->Unmap();
@@ -146,7 +152,7 @@ index f11fc8ccc0c5..377f21177080 100644
  
    /*
 diff --git a/dom/webidl/ImageBitmap.webidl b/dom/webidl/ImageBitmap.webidl
-index 8c27ed1a2591..87f91b8b1104 100644
+index 8c27ed1a2591..0e5906600d40 100644
 --- a/dom/webidl/ImageBitmap.webidl
 +++ b/dom/webidl/ImageBitmap.webidl
 @@ -23,6 +23,11 @@ interface ImageBitmap {
@@ -154,7 +160,7 @@ index 8c27ed1a2591..87f91b8b1104 100644
  };
  
 +dictionary GetImageDataOptions {
-+  ImageData? imageData = null;
++  ArrayBuffer? buffer;
 +  boolean neuter = false;
 +};
 +
