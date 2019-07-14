@@ -29,7 +29,9 @@ videoEl.autoplay = true;
 const canvasEl = document.createElement('canvas');
 const ctx = canvasEl.getContext('2d');
 
+let mediaStream;
 let capturer = null;
+let videoStarted = false;
 
 document.getElementById('startVideo').onclick = async (event) => {
   document.getElementById('videoCaptureFieldset').disabled = true;
@@ -60,8 +62,6 @@ document.getElementById('startVideo').onclick = async (event) => {
   canvasEl.width = width;
   canvasEl.height = height;
 
-  let mediaStream;
-
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({
       video: {
@@ -76,17 +76,9 @@ document.getElementById('startVideo').onclick = async (event) => {
     return;
   }
 
-  if (hasImageCapture) {
-    capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
-  }
-
-  videoEl.srcObject = mediaStream;
-
-  videoEl.oncanplay = () => {
-    document.getElementById('captureMethods').disabled = false;
-    document.getElementById('getImageDataOptions').disabled = !hasPatch;
-    document.getElementById('getImageDataMethods').disabled = false;
-  }
+  document.getElementById('captureMethods').disabled = false;
+  document.getElementById('getImageDataOptions').disabled = !hasPatch;
+  document.getElementById('getImageDataMethods').disabled = false;
 }
 
 function disableUI () {
@@ -96,6 +88,10 @@ function disableUI () {
 }
 
 async function takePhotoCapturer () {
+  if (capturer === null) {
+    capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
+  }
+
   return new Promise(resolve => {
     capturer.takePhoto();
     capturer.onphoto = event => {
@@ -105,9 +101,28 @@ async function takePhotoCapturer () {
 }
 
 const frameCapturers = {
-  'HTMLVideoElement': () => createImageBitmap(videoEl),
+  'HTMLVideoElement': () => {
+    if (!videoStarted) {
+      videoEl.srcObject = mediaStream;
+      videoStarted = true;
+
+      return new Promise(resolve => {
+        video.oncanplay = () => {
+          resolve(createImageBitmap(videoEl));
+        }
+      });
+    }
+
+    return createImageBitmap(videoEl);
+  },
   'ImageCapture.takePhoto': takePhotoCapturer,
-  'ImageCapture.grabFrame': () => capturer.grabFrame()
+  'ImageCapture.grabFrame': () => {
+    if (capturer === null) {
+      capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
+    }
+
+    return capturer.grabFrame()
+  }
 }
 
 document.getElementById('CanvasRenderingContext2D').onclick = () => {
