@@ -133,7 +133,11 @@ const frameCapturers = {
     if (capturer === null) {
       capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
       capturer.onframe = (event) => {
-        pendingOnFramePromiseResolver(event.frame);
+        if (!event.wasDiscarded) {
+          pendingOnFramePromiseResolver(event.getImageBitmap());
+        } else {
+          console.log('Frame discarded');
+        }
       }
     }
 
