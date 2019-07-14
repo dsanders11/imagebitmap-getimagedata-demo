@@ -107,7 +107,7 @@ const frameCapturers = {
       videoStarted = true;
 
       return new Promise(resolve => {
-        video.oncanplay = () => {
+        videoEl.oncanplay = () => {
           resolve(createImageBitmap(videoEl));
         }
       });
