@@ -46,16 +46,16 @@ frame at 30 FPS. If the bottleneck was alleviated, it looks like the FPS could l
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |             Notes             |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:-----------------------------:|
-| CanvasRenderingContext2D | HTMLVideoElement       |          N/A         |  6  |  48.21  |   290 MB   | Memory usage peaked at 340 MB |
-| CanvasRenderingContext2D | ImageCapture.grabFrame |          N/A         | 5-6 |  51.92  |   285 MB   | Memory usage peaked at 343 MB |
-| OffscreenCanvas          | HTMLVideoElement       |          N/A         |  6  |  55.23  |   307 MB   | Memory usage peaked at 347 MB |
-| OffscreenCanvas          | ImageCapture.grabFrame |          N/A         | 5-6 |  52.46  |   318 MB   | Memory usage peaked at 355 MB |
-| ImageBitmap.getImageData | HTMLVideoElement       |          None        | 6-7 |  54.55  |   315 MB   | Memory usage peaked at 355 MB |
-| ImageBitmap.getImageData | HTMLVideoElement       |       imageData      | 6-7 |  54.89  |   266 MB   | Memory range: 264 MB - 267 MB |
-| ImageBitmap.getImageData | HTMLVideoElement       |  imageData + neuter  | 6-7 |  54.91  |   268 MB   | Memory range: 267 MB - 270 MB |
-| ImageBitmap.getImageData | ImageCapture.grabFrame |          None        | 12  |  50.52  |   312 MB   | Memory usage peaked at 347 MB |
-| ImageBitmap.getImageData | ImageCapture.grabFrame |       imageData      | 15  |  52.89  |   264 MB   | Fluctuated 13-22 FPS          |
-| ImageBitmap.getImageData | ImageCapture.grabFrame |  imageData + neuter  | 15  |  50.25  |   263 MB   | Fluctuated 13-22 FPS          |
+| CanvasRenderingContext2D | HTMLVideoElement       |          N/A         |  6  |  55.49  |   326 MB   | Memory usage peaked at 362 MB |
+| CanvasRenderingContext2D | ImageCapture.grabFrame |          N/A         | 5-6 |  53.89  |   301 MB   | Memory usage peaked at 357 MB |
+| OffscreenCanvas          | HTMLVideoElement       |          N/A         |  8  |  69.06  |   283 MB   | Memory usage peaked at 309 MB |
+| OffscreenCanvas          | ImageCapture.grabFrame |          N/A         | 6-7 |  60.11  |   283 MB   | Memory usage peaked at 307 MB |
+| ImageBitmap.getImageData | HTMLVideoElement       |         None         | 8-9 |  68.69  |   284 MB   | Memory usage peaked at 312 MB |
+| ImageBitmap.getImageData | HTMLVideoElement       |        buffer        | 10  |  70.79  |   250 MB   | Memory range: 245 MB - 254 MB |
+| ImageBitmap.getImageData | HTMLVideoElement       |    buffer + neuter   | 10  |  71.31  |   250 MB   | Memory range: 248 MB - 255 MB |
+| ImageBitmap.getImageData | ImageCapture.grabFrame |         None         | 19  |  72.95  |   275 MB   | Memory usage peaked at 301 MB |
+| ImageBitmap.getImageData | ImageCapture.grabFrame |        buffer        | 23  |  67.16  |   244 MB   | Fluctuated 22-24 FPS          |
+| ImageBitmap.getImageData | ImageCapture.grabFrame |    buffer + neuter   | 23  |  66.38  |   245 MB   | Fluctuated 22-24 FPS          |
 
 #### 720p@30
 
