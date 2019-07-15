@@ -9,6 +9,8 @@ onmessage = async (event) => {
   const { type: payloadType } = event.data;
 
   if (payloadType === 'NoOp') {
+    event.data.imageBitmap.close();
+
     postMessage([ 0, 0, 0 ]);
   } else if (payloadType === 'ImageData') {
     const { width, height, buffer } = event.data.imageData;
