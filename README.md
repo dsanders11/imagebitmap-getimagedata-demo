@@ -89,15 +89,15 @@ Android phone.
 | CanvasRenderingContext2D | HTMLVideoElement       |          N/A         |  X  |    X    |      X     | Runs OOM in under 5 secs |
 | CanvasRenderingContext2D | ImageCapture.takePhoto |          N/A         |  X  |    X    |      X     | Runs OOM in under 5 secs |
 | ImageBitmap.getImageData | HTMLVideoElement       |          None        |  X  |    X    |      X     | Runs OOM in under 5 secs |
-| ImageBitmap.getImageData | HTMLVideoElement       |       imageData      | 20  |  71.15  |   327 MB   | Fluctuated 17-25 FPS     |
-| ImageBitmap.getImageData | HTMLVideoElement       |  imageData + neuter  | 20  |  72.15  |   373 MB   | Fluctuated 17-25 FPS     |
+| ImageBitmap.getImageData | HTMLVideoElement       |       imageData      | 20  |  73.24  |   326 MB   | Fluctuated 17-26 FPS     |
+| ImageBitmap.getImageData | HTMLVideoElement       |  imageData + neuter  | 20  |  74.27  |   369 MB   | Fluctuated 17-26 FPS     |
 | ImageBitmap.getImageData | ImageCapture.takePhoto |          None        |  X  |    X    |      X     | Runs OOM in under 5 secs |
-| ImageBitmap.getImageData | ImageCapture.takePhoto |       imageData      | 3-4 |  62.21  |   333 MB   |                          |
-| ImageBitmap.getImageData | ImageCapture.takePhoto |  imageData + neuter  | 3-4 |  62.72  |   354 MB   |                          |
+| ImageBitmap.getImageData | ImageCapture.takePhoto |       imageData      | 3-4 |  63.77  |   377 MB   |                          |
+| ImageBitmap.getImageData | ImageCapture.takePhoto |  imageData + neuter  | 3-4 |  63.52  |   396 MB   |                          |
 
 #### 720p@30
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |           Notes          |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:------------------------:|
 | CanvasRenderingContext2D | HTMLVideoElement       |          N/A         |  X  |    X    |      X     | Runs OOM in under 5 secs |
-| ImageBitmap.getImageData | HTMLVideoElement       |       imageData      | 40+ |  68.00  |   355 MB   | Fluctuated 34-45 FPS     |
+| ImageBitmap.getImageData | HTMLVideoElement       |       imageData      | 40+ |  70.09  |   334 MB   | Fluctuated 30-45 FPS     |
