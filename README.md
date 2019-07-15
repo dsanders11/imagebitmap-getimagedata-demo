@@ -64,10 +64,10 @@ so an FPS of 30 using that capture method is effectively 'maxxed out'.
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |             Notes             |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:-----------------------------:|
-| CanvasRenderingContext2D | HTMLVideoElement       |          N/A         | 12  |  45.18  |   316 MB   | Memory usage peaked at 377 MB |
-| OffscreenCanvas          | HTMLVideoElement       |          N/A         | 12  |  47.26  |   271 MB   | Memory usage peaked at XXX MB |
-| ImageBitmap.getImageData | HTMLVideoElement       |       imageData      | 14  |  46.82  |   250 MB   | Fluctuated 13-16 FPS          | 
-| ImageBitmap.getImageData | ImageCapture.grabFrame |       imageData      | 29  |  43.07  |   248 MB   | Fluctuated 28-30 FPS          |
+| CanvasRenderingContext2D | HTMLVideoElement       |          N/A         | 12  |  65.97  |   308 MB   | Memory usage peaked at 349 MB |
+| OffscreenCanvas          | HTMLVideoElement       |          N/A         | 17  |  64.78  |   266 MB   | Memory usage peaked at 293 MB |
+| ImageBitmap.getImageData | HTMLVideoElement       |        buffer        | 20  |  65.69  |   231 MB   | Fluctuated 19-22 FPS          |
+| ImageBitmap.getImageData | ImageCapture.grabFrame |        buffer        | 30  |  43.61  |   225 MB   |                               |
 
 ### Firefox
 
