@@ -20,7 +20,7 @@ C920 Pro. Swapfile is disabled during testing to avoid the uncertainty that migh
 performance results.
 
 Average CPU and memory usage data were gathered at 5 second intervals over a 2 minute period using `sar`.
-Baseline memory usage for the system is 166 MB.
+Baseline memory usage for the system is 140-170 MB.
 
 All test runs involved a fresh start of the browser.
 
@@ -79,7 +79,8 @@ so we can't use that either.
 Interestingly average memory usage is lower when the `neuter` option is not used.
 
 **WARNING**: With Firefox the `CanvasRenderingContext2D` method tends to run off the rails quite quickly
-and will use a lot of memory and likely lock up the process. It will crash a Raspberry Pi.
+and will use a lot of memory and likely lock up the process. It will crash a Raspberry Pi, or a low-memory
+Android phone.
 
 #### 1080p@30
 
