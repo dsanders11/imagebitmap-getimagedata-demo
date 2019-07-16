@@ -129,7 +129,8 @@ const frameCapturers = {
     return capturer.grabFrame()
   },
   'ImageCapture.onframe': (function() {
-    let lastFrame = null;
+    const bufferCount = 2;
+    let buffers = [];
 
     let pendingOnFramePromiseResolver = null;
 
@@ -139,35 +140,34 @@ const frameCapturers = {
         capturer.onframe = async (event) => {
           // We got a new frame while the previous frame was unclaimed,
           // so that's a frame we had to drop due to being too slow
-          if (lastFrame) {
-            lastFrame.close();  // Dispose of memory
-            lastFrame = null;
+          // We ran out of buffers, so we had to drop a frame due to
+          // being too slow
+          if (buffers.length === bufferCount) {
+            const frame = buffers.shift();
+            frame.close();  // Dispose of memory
             console.log('Frame dropped');
           }
 
           try {
-            lastFrame = await event.createImageBitmap();
+            buffers.push(await event.createImageBitmap());
           } catch {
             // JS execution was too slow and another frame was delivered
+            // before we could grab the data from the browser
             console.log('Frame was discarded');
             return;
           }
 
           if (pendingOnFramePromiseResolver) {
             // Pending promise, consume the latest frame
-            pendingOnFramePromiseResolver(lastFrame);
-            lastFrame = null;
+            pendingOnFramePromiseResolver(buffers.shift());
             pendingOnFramePromiseResolver = null;
           }
         }
       }
 
-      if (lastFrame) {
+      if (buffers.length) {
         // Frame available, so consume it
-        frame = lastFrame;
-        lastFrame = null;
-
-        return frame;
+        return buffers.shift();
       }
 
       // No frame available, wait for next one
