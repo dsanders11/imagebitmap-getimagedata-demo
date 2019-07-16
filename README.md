@@ -9,9 +9,24 @@ amounts of large size garbage.
 It's worth noting that Firefox fails all versions of the current implementation due to
 running the test machine out of memory in under 5 seconds.
 
+## Proposal
+
+```webidl
+dictionary GetImageDataOptions {
+  ArrayBuffer? buffer;
+  boolean neuter = false;
+}
+
+partial interface ImageBitmap {
+  Promise<ImageData> getImageData(int sx, int sy, int sw, int sh, optional GetImageDataOptions = {});
+}
+```
+
 ## ImageBitmap Patches
 
 There's a patch for both Chromium and Firefox. They can be found under the patches directory.
+The Firefox patch does not implement `ImageBitmap.getImageData` with a promise return value
+as I didn't spend the time to find out how to do promises in Firefox's code.
 
 ## Testing
 
