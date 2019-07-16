@@ -320,12 +320,12 @@ async function runForever (getImageDataMethod) {
       const fps = runs.length/2;
 
       avgColor.style.background = `rgb(${result.join(',')})`;
-      fpsCounter.innerText = `Overall: ${fps.toFixed(0)} FPS`;
+      fpsCounter.innerText = `Overall: ${Math.floor(fps)} FPS`;
 
       if (getImageDataMethod === null) {
         workerFPS.innerText = '';
       } else {
-        workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(0)} FPS`;
+        workerFPS.innerText = `Worker: ${Math.floor(1000/mean(workerTimings))} FPS`;
       }
     } catch (err) {
       console.error('Unexpected error');
