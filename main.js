@@ -132,13 +132,13 @@ const frameCapturers = {
   'ImageCapture.onframe': () => {
     if (capturer === null) {
       capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
-      capturer.onframe = (event) => {
+      capturer.onframe = async (event) => {
         try {
           if (pendingOnFramePromiseResolver) {
             resolve = pendingOnFramePromiseResolver;
             pendingOnFramePromiseResolver = null;
 
-            resolve(event.createImageBitmap());
+            resolve(await event.createImageBitmap());
           } else {
             console.log('Frame dropped');
           }
@@ -301,7 +301,7 @@ async function runForever (getImageDataMethod) {
       }
     } catch (err) {
       console.error('Unexpected error');
-      console.error(err.stack);
+      console.error(err);
     }
   }
 }
