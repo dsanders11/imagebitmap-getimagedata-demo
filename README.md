@@ -26,7 +26,8 @@ partial interface ImageBitmap {
 
 There's a patch for both Chromium and Firefox. They can be found under the patches directory.
 The Firefox patch does not implement `ImageBitmap.getImageData` with a promise return value
-as I didn't spend the time to find out how to do promises in Firefox's code.
+as I didn't spend the time to find out how to do promises in Firefox's code. The Chromium
+patch does return a promise, but all work is done on the main thread.
 
 ## Testing
 
