@@ -271,30 +271,34 @@ async function runForever (getImageDataMethod) {
   let framePromise = captureFrame();
 
   while (true) {
-    const resultPromise = processFrame(await framePromise);
-    framePromise = captureFrame();
+    try {
+      const resultPromise = processFrame(await framePromise);
+      framePromise = captureFrame();
 
-    // Measure the run time of the worker for the frame
-    const start = performance.now();
-    const result = await resultPromise;
-    const now = performance.now();
+      // Measure the run time of the worker for the frame
+      const start = performance.now();
+      const result = await resultPromise;
+      const now = performance.now();
 
-    workerTimings.unshift(now - start);
-    workerTimings = workerTimings.slice(0, 60);
+      workerTimings.unshift(now - start);
+      workerTimings = workerTimings.slice(0, 60);
 
-    runs.push(now);
-    
-    const timeCutoff = now - 2000;
-    runs = runs.filter(run => run >= timeCutoff);
-    const fps = runs.length/2;
+      runs.push(now);
+      
+      const timeCutoff = now - 2000;
+      runs = runs.filter(run => run >= timeCutoff);
+      const fps = runs.length/2;
 
-    avgColor.style.background = `rgb(${result.join(',')})`;
-    fpsCounter.innerText = `Overall: ${fps.toFixed(0)} FPS`;
+      avgColor.style.background = `rgb(${result.join(',')})`;
+      fpsCounter.innerText = `Overall: ${fps.toFixed(0)} FPS`;
 
-    if (getImageDataMethod === null) {
-      workerFPS.innerText = '';
-    } else {
-      workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(0)} FPS`;
+      if (getImageDataMethod === null) {
+        workerFPS.innerText = '';
+      } else {
+        workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(0)} FPS`;
+      }
+    } catch {
+      console.trace('Unexpected error');
     }
   }
 }
