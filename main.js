@@ -129,9 +129,8 @@ const frameCapturers = {
     return capturer.grabFrame()
   },
   'ImageCapture.onframe': (function() {
-    let lastFrameEvent = null;
+    let lastFrame = null;
 
-    let creatingImageBitmap = false;
     let pendingOnFramePromiseResolver = null;
 
     return async () => {
@@ -140,56 +139,41 @@ const frameCapturers = {
         capturer.onframe = async (event) => {
           // We got a new frame while the previous frame was unclaimed,
           // so that's a frame we had to drop due to being too slow
-          if (lastFrameEvent) {
-            lastFrameEvent = null;
+          if (lastFrame) {
+            lastFrame.close();  // Dispose of memory
+            lastFrame = null;
             console.log('Frame dropped');
           }
 
-          // We were fast and were waiting for a frame, so resolve that
-          // promise now that we have a fresh frame
-          if (!creatingImageBitmap && pendingOnFramePromiseResolver) {
-            try {
-              creatingImageBitmap = true;
-              pendingOnFramePromiseResolver(await event.createImageBitmap());
-              pendingOnFramePromiseResolver = null;
-            } catch {
-              // JS execution was too slow and another frame was delivered
-              console.log('Frame was discarded');
-            } finally {
-              creatingImageBitmap = false;
-            }
-          } else {
-            lastFrameEvent = event;
+          try {
+            lastFrame = await event.createImageBitmap();
+          } catch {
+            // JS execution was too slow and another frame was delivered
+            console.log('Frame was discarded');
+            return;
+          }
+
+          if (pendingOnFramePromiseResolver) {
+            // Pending promise, consume the latest frame
+            pendingOnFramePromiseResolver(lastFrame);
+            lastFrame = null;
+            pendingOnFramePromiseResolver = null;
           }
         }
       }
 
-      // This promise will be used if there's no frame waiting for us,
-      // or if the waiting frame has already been discarded by the browser
-      const promise = new Promise(resolve => {
-        pendingOnFramePromiseResolver = resolve;
-      });
+      if (lastFrame) {
+        // Frame available, so consume it
+        frame = lastFrame;
+        lastFrame = null;
 
-      if (lastFrameEvent) {
-        // We're running a little slow and there's a frame waiting for us
-        frame = lastFrameEvent;
-        lastFrameEvent = null;
-
-        try {
-          creatingImageBitmap = true;
-          const imageBitmap = await frame.createImageBitmap();
-          pendingOnFramePromiseResolver = null;
-
-          return imageBitmap;
-        } catch {
-          // JS execution was too slow and another frame was delivered
-          console.log('Frame was discarded');
-        } finally {
-          creatingImageBitmap = false;
-        }
+        return frame;
       }
 
-      return promise;
+      // No frame available, wait for next one
+      return new Promise(resolve => {
+        pendingOnFramePromiseResolver = resolve;
+      });
     }
   })()
 }
