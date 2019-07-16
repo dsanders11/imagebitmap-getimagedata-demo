@@ -37,7 +37,6 @@ let mediaStream;
 let videoStarted = false;
 
 let capturer = null;
-let pendingOnFramePromiseResolver = null;
 
 document.getElementById('startVideo').onclick = async (event) => {
   document.getElementById('videoCaptureFieldset').disabled = true;
@@ -129,32 +128,70 @@ const frameCapturers = {
 
     return capturer.grabFrame()
   },
-  'ImageCapture.onframe': () => {
-    if (capturer === null) {
-      capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
-      capturer.onframe = async (event) => {
-        let resolve;
+  'ImageCapture.onframe': (function() {
+    let lastFrameEvent = null;
 
-        try {
-          if (pendingOnFramePromiseResolver) {
-            resolve = pendingOnFramePromiseResolver;
-            pendingOnFramePromiseResolver = null;
+    let creatingImageBitmap = false;
+    let pendingOnFramePromiseResolver = null;
 
-            resolve(await event.createImageBitmap());
-          } else {
+    return async () => {
+      if (capturer === null) {
+        capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
+        capturer.onframe = async (event) => {
+          // We got a new frame while the previous frame was unclaimed,
+          // so that's a frame we had to drop due to being too slow
+          if (lastFrameEvent) {
+            lastFrameEvent = null;
             console.log('Frame dropped');
           }
-        } catch {
-          pendingOnFramePromiseResolver = resolve;
-          console.log('Frame discarded');
+
+          // We were fast and were waiting for a frame, so resolve that
+          // promise now that we have a fresh frame
+          if (!creatingImageBitmap && pendingOnFramePromiseResolver) {
+            try {
+              creatingImageBitmap = true;
+              pendingOnFramePromiseResolver(await event.createImageBitmap());
+              pendingOnFramePromiseResolver = null;
+            } catch {
+              // JS execution was too slow and another frame was delivered
+              console.log('Frame was discarded');
+            } finally {
+              creatingImageBitmap = false;
+            }
+          } else {
+            lastFrameEvent = event;
+          }
         }
       }
-    }
 
-    return new Promise(resolve => {
-      pendingOnFramePromiseResolver = resolve;
-    });
-  }
+      // This promise will be used if there's no frame waiting for us,
+      // or if the waiting frame has already been discarded by the browser
+      const promise = new Promise(resolve => {
+        pendingOnFramePromiseResolver = resolve;
+      });
+
+      if (lastFrameEvent) {
+        // We're running a little slow and there's a frame waiting for us
+        frame = lastFrameEvent;
+        lastFrameEvent = null;
+
+        try {
+          creatingImageBitmap = true;
+          const imageBitmap = await frame.createImageBitmap();
+          pendingOnFramePromiseResolver = null;
+
+          return imageBitmap;
+        } catch {
+          // JS execution was too slow and another frame was delivered
+          console.log('Frame was discarded');
+        } finally {
+          creatingImageBitmap = false;
+        }
+      }
+
+      return promise;
+    }
+  })()
 }
 
 document.getElementById('CanvasRenderingContext2D').onclick = () => {
