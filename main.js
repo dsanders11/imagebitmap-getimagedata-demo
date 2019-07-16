@@ -299,8 +299,9 @@ async function runForever (getImageDataMethod) {
       } else {
         workerFPS.innerText = `Worker: ${(1000/mean(workerTimings)).toFixed(0)} FPS`;
       }
-    } catch {
-      console.trace('Unexpected error');
+    } catch (err) {
+      console.error('Unexpected error');
+      console.error(err.stack);
     }
   }
 }
