@@ -128,6 +128,10 @@ const frameCapturers = {
 
     return capturer.grabFrame()
   },
+  // Use onframe to provide an implementation similar to how you'd
+  // get frames directly from a video driver.
+  //   * Dropped = We ran out of userland buffers
+  //   * Discarded = Browser implementation discarded frame to save memory
   'ImageCapture.onframe': (function() {
     const bufferCount = 2;
     let buffers = [];
