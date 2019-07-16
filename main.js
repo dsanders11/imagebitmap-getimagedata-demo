@@ -133,6 +133,8 @@ const frameCapturers = {
     if (capturer === null) {
       capturer = new ImageCapture(mediaStream.getVideoTracks()[0]);
       capturer.onframe = async (event) => {
+        let resolve;
+
         try {
           if (pendingOnFramePromiseResolver) {
             resolve = pendingOnFramePromiseResolver;
@@ -143,6 +145,7 @@ const frameCapturers = {
             console.log('Frame dropped');
           }
         } catch {
+          pendingOnFramePromiseResolver = resolve;
           console.log('Frame discarded');
         }
       }
