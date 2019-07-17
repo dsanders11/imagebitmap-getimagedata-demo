@@ -38,8 +38,9 @@ performance results.
 Average CPU and memory usage data were gathered at 5 second intervals over a 2 minute period using
 `sar`. Baseline memory usage for the system is 140-180 MB.
 
-The test demo uses the `ImageData` to compute the average color of the frame. It uses striding
-so that it takes less than 30 MS for a 1080px image so that it is not the bottleneck in the test.
+The [test demo](https://dsanders11.github.io/imagebitmap-getimagedata-demo/) uses the `ImageData`
+to compute the average color of the frame. It uses striding so that it takes less than 30 MS for
+a 1080p image so that it is not the bottleneck in the test.
 
 All test runs involved a fresh start of the browser.
 
