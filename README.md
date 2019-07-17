@@ -18,7 +18,7 @@ dictionary GetImageDataOptions {
 }
 
 partial interface ImageBitmap {
-  Promise<ImageData> getImageData(int sx, int sy, int sw, int sh, optional GetImageDataOptions = {});
+  [NewObject] Promise<ImageData> getImageData(int sx, int sy, int sw, int sh, optional GetImageDataOptions = {});
 }
 ```
 
