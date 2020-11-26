@@ -105,12 +105,12 @@ Android phone.
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |           Notes          |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:------------------------:|
-| CanvasRenderingContext2D | HTMLVideoElement       |          N/A         |  X  |    X    |      X     | Runs OOM in under 5 secs |
-| CanvasRenderingContext2D | ImageCapture.takePhoto |          N/A         |  X  |    X    |      X     | Runs OOM in under 5 secs |
-| ImageBitmap.getImageData | HTMLVideoElement       |          None        |  X  |    X    |      X     | Runs OOM in under 5 secs |
+| CanvasRenderingContext2D | HTMLVideoElement       |          N/A         | :x: |   :x:   |     :x:    | Runs OOM in under 5 secs |
+| CanvasRenderingContext2D | ImageCapture.takePhoto |          N/A         | :x: |   :x:   |     :x:    | Runs OOM in under 5 secs |
+| ImageBitmap.getImageData | HTMLVideoElement       |          None        | :x: |   :x:   |     :x:    | Runs OOM in under 5 secs |
 | ImageBitmap.getImageData | HTMLVideoElement       |         buffer       | 20  |  73.24  |   326 MB   | Fluctuated 17-26 FPS     |
 | ImageBitmap.getImageData | HTMLVideoElement       |    buffer + neuter   | 20  |  74.27  |   369 MB   | Fluctuated 17-26 FPS     |
-| ImageBitmap.getImageData | ImageCapture.takePhoto |          None        |  X  |    X    |      X     | Runs OOM in under 5 secs |
+| ImageBitmap.getImageData | ImageCapture.takePhoto |          None        | :x: |   :x:   |     :x:    | Runs OOM in under 5 secs |
 | ImageBitmap.getImageData | ImageCapture.takePhoto |         buffer       | 3-4 |  63.77  |   377 MB   |                          |
 | ImageBitmap.getImageData | ImageCapture.takePhoto |    buffer + neuter   | 3-4 |  63.52  |   396 MB   |                          |
 
@@ -118,5 +118,5 @@ Android phone.
 
 | ImageData Method         | Capture Method         | GetImageData Options | FPS | Avg CPU | Avg Memory |           Notes          |
 |--------------------------|:----------------------:|:--------------------:|:---:|:-------:|:----------:|:------------------------:|
-| CanvasRenderingContext2D | HTMLVideoElement       |          N/A         |  X  |    X    |      X     | Runs OOM in under 5 secs |
+| CanvasRenderingContext2D | HTMLVideoElement       |          N/A         | :x: |   :x:   |     :x:    | Runs OOM in under 5 secs |
 | ImageBitmap.getImageData | HTMLVideoElement       |         buffer       | 40+ |  70.09  |   334 MB   | Fluctuated 30-45 FPS     |
